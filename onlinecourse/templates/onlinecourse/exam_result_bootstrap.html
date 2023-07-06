@@ -36,20 +36,49 @@
 </nav>
 
 <div class="container-fluid">
-    {% if grade > 80 %}
-    <div class="alert alert-success">
-       <!--HINT Display passed info -->
-    </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
-        </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
+    <h2>Exam Result for {{ course.name }}</h2>
+    <div class="card mt-1">
+        <div class="card-body">
+            <h3>Your Submission Details</h3>
+            <p>Submission ID: {{ submission.id }}</p>
+            <p>Total Score: {{ total_score }}</p>
+            {% if total_score >= 50 %}
+                <p>Congratulations! You have passed the exam.</p>
+            {% else %}
+                <p>Sorry, you did not pass the exam. Please review your incorrect choices and retake the exam.</p>
+            {% endif %}
         </div>
     </div>
+
+    <h3>Question Results</h3>
+    {% for result in question_results %}
+        <div class="card mt-1">
+            <div class="card-header">
+                <h5>Question: {{ result.question.question_text }}</h5>
+            </div>
+            <div class="card-body">
+                {% if result.is_correct %}
+                    <p><strong>Correct! You earned {{ result.grade_point }} points.</strong></p>
+                {% else %}
+                    <p><strong>Incorrect! You earned 0 points.</strong></p>
+                    <p><strong>Correct Choices:</strong></p>
+                    <ul>
+                        {% for choice in result.question.choice_set.all %}
+                            {% if choice.is_correct %}
+                                <li>{{ choice.choice_text }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <p><strong>Your Choices:</strong></p>
+                <ul>
+                    {% for choice in result.selected_choices %}
+                        <li>{{ choice.choice_text }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 </body>
 </html>

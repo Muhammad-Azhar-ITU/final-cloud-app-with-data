@@ -41,62 +41,56 @@
 
     <!-- Page content -->
     <div class="container-fluid">
-            <h2>{{ course.name }}</h2>
-            <div class="card-columns-vertical">
-                {% for lesson in course.lesson_set.all %}
-                    <div class="card mt-1">
-                        <div class="card-header"><h5>Lesson {{lesson.order|add:1}}: {{lesson.title}}</h5></div>
-                        <div class="card-body">{{lesson.content}}</div>
-                    </div>
-                {% endfor %}
-            </div>
-            <!-- Task: show questions and choices -->
-            <!-- <HINT> Use Bootstrap Collapse to hide exam first, more details could be found here
-            https://www.w3schools.com/bootstrap4/bootstrap_collapse.asp-->
-
-            <!--
-
-            A collapse example here:
-            <div id="exam" class="collapse">
-                Click to expand elements within the collapse div
+        <h2>{{ course.name }}</h2>
+        <div class="card-columns-vertical">
+            {% for lesson in course.lesson_set.all %}
+                <div class="card mt-1">
+                    <div class="card-header"><h5>Lesson {{ lesson.order|add:1 }}: {{ lesson.title }}</h5></div>
+                    <div class="card-body">{{ lesson.content }}</div>
                 </div>
+            {% endfor %}
+        </div>
 
-            -->
-
-            <!-- <HINT> If user is authenticated, show course exam with a list of question -->
-
-            <!-- <HINT> Each example will have many questions -->
-
-            <!-- <HINT> Each question will have many choices -->
-
-
-            <!-- <HINT> Create a form to collect the selected choices for all questions -->
-            <!-- <HINT> For each question choice, you may create a checkbox input like
-            <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
-            -->
-
-            <!-- A choice submission form example
-            <form id="questionform" action="point to a submit view" method="post">
-                        ... for each question in the course ...
-                        <div class="card mt-1">
-                            <div class="card-header"><h5>{{ question.question_text}}</h5></div>
+        <!-- Task: show questions and choices -->
+        {% if user.is_authenticated %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Exam</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Use Bootstrap Collapse to hide the exam initially -->
+                    <div id="exam-collapse" class="collapse">
+                        <!-- Iterate over the questions -->
+                        <form id="exam-form" action="{% url 'onlinecourse:submit_exam' course.id %}" method="post">
                             {% csrf_token %}
-                            <div class="form-group">
-                               ... for each choice in the question ...
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input type="checkbox" name="choice_{{choice.id}}"
-                                               class="form-check-input" id="{{choice.id}}"
-                                               value="{{choice.id}}">{{ choice.choice_text }}
-                                    </label>
+                            {% for question in exam_questions %}
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5>{{ question.question_text }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Iterate over the choices -->
+                                        {% for choice in question.choices.all %}
+                                            <div class="form-check">
+                                                <input type="checkbox" name="choices" id="choice_{{ choice.id }}">
+                                                <label for="choice_{{ choice.id }}">{{ choice.choice_text }}</label>
+                                                <input type="checkbox" name="choices" id="choice_{{ choice.id }}" value="{{ choice.id }}">
+                                            </div>
+                                        {% endfor %} <!-- Add this line to close the inner for loop -->
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    <input class="btn btn-success btn-block" type="submit" value="Submit">
-            </form> -->
-
-            <!--Check here to see more details Bootstrap checkbox
-             https://www.w3schools.com/bootstrap4/bootstrap_forms_inputs.asp-->
+                            {% endfor %} <!-- Add this line to close the outer for loop -->
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#exam-collapse" aria-expanded="false" aria-controls="exam-collapse">
+                        Start Exam
+                    </button>
+                </div>
+            </div>
+        {% endif %}
     </div>
+
+
 </body>
 </html>
